@@ -57,14 +57,14 @@ func SignBody(body []byte, address string) string {
 
 func SignHash(hash []byte) string {
 	key := Hash([]byte("secret_key"))
-	signed := Xor(hash,key)
+	signed := Hash(hash,key)
 	return hex.EncodeToString(signed)
 }
 
-func Xor(a []byte, b []byte) ([]byte){
-	c := make([]byte, len(a))
-	for i := 0; i<len(a); i++ {
-		c[i] = a[i] ^ b[i]
-	}
-	return c
-}
+// func Xor(a []byte, b []byte) ([]byte){
+// 	c := make([]byte, len(a))
+// 	for i := 0; i<len(a); i++ {
+// 		c[i] = a[i] ^ b[i]
+// 	}
+// 	return c
+//  }

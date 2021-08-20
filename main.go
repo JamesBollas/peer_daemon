@@ -55,6 +55,7 @@ func sendMessage(writer http.ResponseWriter, request *http.Request) {
 	address := request.Header.Get("address")
 
 	signature := authenticationHelper.SignBody(body, address)
+	fmt.Println(address)
 	fmt.Println(signature)
 	myAddress := getMyAddress()
 
