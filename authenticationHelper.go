@@ -1,9 +1,9 @@
-package authenticationHelper
+package main
 
 import(
 	"fmt"
 	"crypto/sha256"
-	"yukon_go/torHelper"
+	//"yukon_go/torHelper"
 	"net/url"
 	"encoding/hex"
 )
@@ -22,7 +22,7 @@ func verifySignature256(remoteAddress string, myAddress string, signature string
 	remoteHashAddress := signaturePath(remoteAddress)
 	//fmt.Println(remoteAddress)
 
-	remoteSignature, err := torHelper.PostResponse(remoteHashAddress, hash)
+	remoteSignature, err := PostResponse(remoteHashAddress, hash)
 	if err != nil{
 		fmt.Println(err)
 		return false

@@ -1,4 +1,4 @@
-package torHelper
+package main
 
 import(
 	"golang.org/x/net/proxy"

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"io"
-	"yukon_go/authenticationHelper"
-	"yukon_go/torHelper"
+	//"yukon_go/authenticationHelper"
+	//"yukon_go/torHelper"
 )
 
 func main() {
@@ -31,7 +31,7 @@ func indexRoute(writer http.ResponseWriter, request *http.Request) {
 	signature := request.Header.Get("signature")
 	hashType := request.Header.Get("hash")
 	myAddress := getMyAddress()
-	verification := authenticationHelper.VerifySignature(remoteAddress, myAddress, hashType, signature, body)
+	verification := VerifySignature(remoteAddress, myAddress, hashType, signature, body)
 	if !verification{
 		writer.WriteHeader(403)
 		return
@@ -44,7 +44,7 @@ func indexRoute(writer http.ResponseWriter, request *http.Request) {
 func hashCookieRoute(writer http.ResponseWriter, request * http.Request) {
 	hash, _ := ioutil.ReadAll(request.Body)
 	//fmt.Println(string(body))
-	signature := authenticationHelper.SignHash(hash)
+	signature := SignHash(hash)
 	fmt.Println(signature)
 	io.WriteString(writer, signature)
 }
@@ -54,7 +54,7 @@ func sendMessage(writer http.ResponseWriter, request *http.Request) {
 	//fmt.Println(string(body))
 	address := request.Header.Get("address")
 
-	signature := authenticationHelper.SignBody(body, address)
+	signature := SignBody(body, address)
 	fmt.Println(address)
 	fmt.Println(signature)
 	myAddress := getMyAddress()
@@ -62,7 +62,7 @@ func sendMessage(writer http.ResponseWriter, request *http.Request) {
 	
 	headers := map[string]string {"remoteAddress":myAddress,"signature":signature,"hash":"sha256"}
 
-	torHelper.PostWithHeader(address, body, headers)
+	PostWithHeader(address, body, headers)
 
 }
 
