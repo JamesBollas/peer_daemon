@@ -1,4 +1,4 @@
-module yukon_go
+module peer_daemon
 
 go 1.15
 
