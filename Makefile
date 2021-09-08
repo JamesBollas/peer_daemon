@@ -1,2 +1,2 @@
 build: main.go
-	go build -o ./install_files/yukon_server *.go
+	go build -o ./install_files/peer_daemon *.go

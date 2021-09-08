@@ -10,7 +10,7 @@ import (
 	//"yukon_go/torHelper"
 )
 
-func main() {
+func (p program) run() {
 	exposed := http.NewServeMux()
 
 	exposed.HandleFunc("/", indexRoute)

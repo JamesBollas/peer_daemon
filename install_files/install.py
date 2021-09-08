@@ -16,5 +16,5 @@ hidden_service_socket = os.path.join(in_dir, "hidden_service.socket")
 
 torrc += "HiddenServicePort 80 unix:" + hidden_service_socket + "\n"
 
-with open("yukon.torrc", "w") as f:
+with open("peer_daemon.torrc", "w") as f:
 	f.write(torrc)
