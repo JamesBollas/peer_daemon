@@ -5,8 +5,8 @@ import (
    "github.com/kardianos/service"
 )
 
-const serviceName = "Medium service"
-const serviceDescription = "Simple service, just for fun"
+const serviceName = "peer_daemon"
+const serviceDescription = "allows peer connections through internet proxy with global referents (tor)"
 
 type program struct{}
 
