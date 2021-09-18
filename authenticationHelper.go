@@ -1,65 +1,74 @@
 package main
 
 import(
-	"fmt"
-	"crypto/sha256"
+	//"fmt"
+	//"crypto/sha256"
 	//"yukon_go/torHelper"
 	"net/url"
 	"encoding/hex"
+	"crypto/ed25519"
+	//"crypto/x509"
+	"crypto/rand"
 )
 
-func VerifySignature(remoteAddress string, myAddress string, hashType string, signature string, body []byte) bool {
-	if hashType == "sha256" {
-		return verifySignature256(remoteAddress, myAddress, signature, body)
+var privateKey ed25519.PrivateKey
+var publicKey ed25519.PublicKey
+
+func VerifySignature(remoteAddress string, myAddress string, cryptoStandard string, signature string, body []byte) bool {
+	if cryptoStandard == "ed25519" {
+		return verifySignatureEd25519(remoteAddress, myAddress, signature, body)
 	}
 	return false
 }
 
-func verifySignature256(remoteAddress string, myAddress string, signature string, body []byte) bool {
-	//bodyAndAddress := append(body, []byte(myAddress)...)
-	hash := Hash(body, []byte(myAddress))
-
-	remoteHashAddress := signaturePath(remoteAddress)
-	//fmt.Println(remoteAddress)
-
-	remoteSignature, err := PostResponse(remoteHashAddress, hash)
-	if err != nil{
-		fmt.Println(err)
-		return false
-	}
-	if string(remoteSignature) == signature {
-		return true
-	}
-	return false
+func verifySignatureEd25519(remoteAddress string, myAddress string, signature string, body []byte) bool {
+	remoteKey := getRemoteKey(remoteAddress)
+	signatureBytes, _ := hex.DecodeString(signature)
+	return ed25519.Verify(remoteKey, body, signatureBytes)
 }
 
-func signaturePath(address string) string {
+func getRemoteKey(remoteAddress string) ed25519.PublicKey {
+	//todo add standard type to request
+	keyAddress := remoteKeyPath(remoteAddress)
+	keyBytes, _ := PostThroughProxy(keyAddress, []byte(""),nil)
+	key := ed25519.PublicKey(keyBytes)
+	return key
+}
+
+func remoteKeyPath(address string) string {
 	a, _ := url.Parse(address)
-	c, _ := url.Parse("./hashcookie")
+	c, _ := url.Parse("./publickey")
 	a = a.ResolveReference(c)
 	return a.String()
 }
 
-func Hash(bodies ... []byte) []byte {
-	h := sha256.New()
-	for _, body := range bodies{
-		h.Write(body)
-	}
-	hash := h.Sum(nil)
-	return hash
+// func Hash(bodies ... []byte) []byte {
+// 	h := sha256.New()
+// 	for _, body := range bodies{
+// 		h.Write(body)
+// 	}
+// 	hash := h.Sum(nil)
+// 	return hash
+// }
+
+func MyPublicKey() ed25519.PublicKey {
+	return publicKey
+}
+
+func InitializeKeys(){
+	publicKey, privateKey, _ = ed25519.GenerateKey(rand.Reader)
 }
 
 func SignBody(body []byte, address string) string {
-	//bodyAndAddress := append(body, []byte(address)...)
-	hash := Hash(body, []byte(address))
-	return SignHash(hash)
+	signatureBytes := ed25519.Sign(privateKey, body)
+	return hex.EncodeToString(signatureBytes)
 }
 
-func SignHash(hash []byte) string {
-	key := Hash([]byte("secret_key"))
-	signed := Hash(hash,key)
-	return hex.EncodeToString(signed)
-}
+// func SignHash(hash []byte) string {
+// 	key := Hash([]byte("secret_key"))
+// 	signed := Hash(hash,key)
+// 	return hex.EncodeToString(signed)
+// }
 
 // func Xor(a []byte, b []byte) ([]byte){
 // 	c := make([]byte, len(a))

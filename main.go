@@ -5,16 +5,18 @@ import (
 	//"log"
 	"fmt"
 	"io/ioutil"
-	"io"
+	//"io"
 	//"yukon_go/authenticationHelper"
 	//"yukon_go/torHelper"
 )
 
 func (p program) run() {
+	//run by the service wrapper. essentially the main function.
+	InitializeKeys()
 	exposed := http.NewServeMux()
 
 	exposed.HandleFunc("/", indexRoute)
-	exposed.HandleFunc("/hashcookie", hashCookieRoute)
+	exposed.HandleFunc("/publickey", publicKeyRoute)
 
 	locals := http.NewServeMux()
 	locals.HandleFunc("/sendmessage", sendMessage)
@@ -29,9 +31,9 @@ func indexRoute(writer http.ResponseWriter, request *http.Request) {
 	//fmt.Println(string(body))
 	remoteAddress := request.Header.Get("remoteAddress")
 	signature := request.Header.Get("signature")
-	hashType := request.Header.Get("hash")
+	cryptoStandard := request.Header.Get("cryptoStandard")
 	myAddress := getMyAddress()
-	verification := VerifySignature(remoteAddress, myAddress, hashType, signature, body)
+	verification := VerifySignature(remoteAddress, myAddress, cryptoStandard, signature, body)
 	if !verification{
 		writer.WriteHeader(403)
 		return
@@ -41,12 +43,9 @@ func indexRoute(writer http.ResponseWriter, request *http.Request) {
 	fmt.Println(body)
 }
 
-func hashCookieRoute(writer http.ResponseWriter, request * http.Request) {
-	hash, _ := ioutil.ReadAll(request.Body)
-	//fmt.Println(string(body))
-	signature := SignHash(hash)
-	fmt.Println(signature)
-	io.WriteString(writer, signature)
+func publicKeyRoute(writer http.ResponseWriter, request * http.Request) {
+	key := []byte(MyPublicKey())
+	writer.Write(key)
 }
 
 func sendMessage(writer http.ResponseWriter, request *http.Request) {
@@ -62,7 +61,7 @@ func sendMessage(writer http.ResponseWriter, request *http.Request) {
 	
 	headers := map[string]string {"remoteAddress":myAddress,"signature":signature,"hash":"sha256"}
 
-	PostWithHeader(address, body, headers)
+	PostThroughProxy(address, body, headers)
 
 }
 
