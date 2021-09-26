@@ -3,17 +3,16 @@ package main
 import(
 	"golang.org/x/net/proxy"
 	"net/http"
-	"net/url"
+	//"net/url"
 	"bytes"
 	"io/ioutil"
+	"os"
 )
 
 func PostThroughProxy(address string, message []byte, headers map[string]string) ([]byte, error){
-	torLocal := "socks5://127.0.0.1:9050"
+	torLocal := os.Getenv("PROXY_SOCKET")
 
-	tbProxyURL, _ := url.Parse(torLocal)
-
-	tbDialer, err := proxy.FromURL(tbProxyURL, proxy.Direct)
+	tbDialer, err := proxy.SOCKS5("unix",torLocal ,nil, proxy.Direct)
 	if err != nil{
 		return nil, err
 	}

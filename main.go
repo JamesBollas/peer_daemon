@@ -5,6 +5,8 @@ import (
 	//"log"
 	"fmt"
 	"io/ioutil"
+	"os"
+	"net"
 	//"io"
 	//"yukon_go/authenticationHelper"
 	//"yukon_go/torHelper"
@@ -13,20 +15,26 @@ import (
 func (p program) run() {
 	//run by the service wrapper. essentially the main function.
 	InitializeKeys()
-	exposed := http.NewServeMux()
+	LoadEnvironment()
 
+
+	exposed := http.NewServeMux()
 	exposed.HandleFunc("/", indexRoute)
 	exposed.HandleFunc("/publickey", publicKeyRoute)
 
 	locals := http.NewServeMux()
 	locals.HandleFunc("/sendmessage", sendMessage)
 
-	fmt.Printf("Starting server at port 8080\n")
-	go http.ListenAndServe(":8081", locals)
-	http.ListenAndServe(":8080", exposed)
+	localListener, _ := net.Listen("tcp",os.Getenv("LOCAL_SOCKET"))
+	hiddenServiceListener, _ := net.Listen("unix",os.Getenv("HIDDEN_SERVICE_SOCKET"))
+
+	fmt.Printf("Starting server\n")
+	go http.Serve(localListener, locals)
+	http.Serve(hiddenServiceListener, exposed)
 }
 
 func indexRoute(writer http.ResponseWriter, request *http.Request) {
+	fmt.Println("recieved a thingy")
 	body, _ := ioutil.ReadAll(request.Body)
 	//fmt.Println(string(body))
 	remoteAddress := request.Header.Get("remoteAddress")
@@ -59,12 +67,16 @@ func sendMessage(writer http.ResponseWriter, request *http.Request) {
 	myAddress := getMyAddress()
 
 	
-	headers := map[string]string {"remoteAddress":myAddress,"signature":signature,"hash":"sha256"}
+	headers := map[string]string {"remoteAddress":myAddress,"signature":signature,"cryptoStandard":"ed25519"}
 
 	PostThroughProxy(address, body, headers)
 
 }
 
 func getMyAddress() string{
-	return "http://wmjrfxz2ikhfi2vmm7jgtttktmjivibbcxsgzupc5m55px76a2ihdzad.onion"
+	hostname, err := ioutil.ReadFile(os.Getenv("HOSTNAME_PATH"))
+	if err != nil{
+		panic("no valid hostname file at location")
+	}
+	return string(hostname)
 }

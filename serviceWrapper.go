@@ -3,6 +3,7 @@ package main
 import (
    "fmt"
    "github.com/kardianos/service"
+   "os"
 )
 
 const serviceName = "peer_daemon"
@@ -18,6 +19,7 @@ func (p program) Start(s service.Service) error {
 
 func (p program) Stop(s service.Service) error {
    fmt.Println(s.String() + " stopped")
+   os.Remove(os.Getenv("HIDDEN_SERVICE_SOCKET"))
    return nil
 }
 
