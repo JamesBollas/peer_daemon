@@ -41,17 +41,19 @@ func indexRoute(writer http.ResponseWriter, request *http.Request) {
 	signature := request.Header.Get("signature")
 	cryptoStandard := request.Header.Get("cryptoStandard")
 	myAddress := getMyAddress()
+	fmt.Println(remoteAddress)
 	verification := VerifySignature(remoteAddress, myAddress, cryptoStandard, signature, body)
 	if !verification{
 		writer.WriteHeader(403)
 		return
 	}
-
+	fmt.Println("printing message:")
 
 	fmt.Println(body)
 }
 
 func publicKeyRoute(writer http.ResponseWriter, request * http.Request) {
+	fmt.Println("sending public key")
 	key := []byte(MyPublicKey())
 	writer.Write(key)
 }
@@ -66,9 +68,10 @@ func sendMessage(writer http.ResponseWriter, request *http.Request) {
 	fmt.Println(signature)
 	myAddress := getMyAddress()
 
-	
+	//fmt.Println(len(myAddress))
+	//fmt.Println(len(signature))
 	headers := map[string]string {"remoteAddress":myAddress,"signature":signature,"cryptoStandard":"ed25519"}
-
+	//headers = map[string]string {"hi":"hi"}
 	PostThroughProxy(address, body, headers)
 
 }
@@ -78,5 +81,5 @@ func getMyAddress() string{
 	if err != nil{
 		panic("no valid hostname file at location")
 	}
-	return string(hostname)
+	return "http://" + string(hostname)
 }

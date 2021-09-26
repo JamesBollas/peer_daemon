@@ -7,6 +7,8 @@ import(
 	"bytes"
 	"io/ioutil"
 	"os"
+	"fmt"
+	"strings"
 )
 
 func PostThroughProxy(address string, message []byte, headers map[string]string) ([]byte, error){
@@ -23,12 +25,14 @@ func PostThroughProxy(address string, message []byte, headers map[string]string)
 	messageReader := bytes.NewReader(message)
 
 	req, err := http.NewRequest("POST", address , messageReader)
-	if headers == nil{
+	if headers != nil{
 		for key, value := range headers {
+			key = strings.TrimRight(key, "\r\n")
+			value = strings.TrimRight(value, "\r\n")
 			req.Header.Add(key, value)
 		}
 	}
-
+	fmt.Println("got past headers")
 	//req.Header.Add("User-Agent", "myClient")
 
 	resp, err := client.Do(req)

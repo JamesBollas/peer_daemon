@@ -1,7 +1,7 @@
 package main
 
 import(
-	//"fmt"
+	"fmt"
 	//"crypto/sha256"
 	//"yukon_go/torHelper"
 	"net/url"
@@ -22,6 +22,7 @@ func VerifySignature(remoteAddress string, myAddress string, cryptoStandard stri
 }
 
 func verifySignatureEd25519(remoteAddress string, myAddress string, signature string, body []byte) bool {
+	fmt.Println("got to verification")
 	remoteKey := getRemoteKey(remoteAddress)
 	signatureBytes, _ := hex.DecodeString(signature)
 	return ed25519.Verify(remoteKey, body, signatureBytes)
@@ -30,7 +31,9 @@ func verifySignatureEd25519(remoteAddress string, myAddress string, signature st
 func getRemoteKey(remoteAddress string) ed25519.PublicKey {
 	//todo add standard type to request
 	keyAddress := remoteKeyPath(remoteAddress)
+	//fmt.Println(keyAddress)
 	keyBytes, _ := PostThroughProxy(keyAddress, []byte(""),nil)
+	//fmt.Println(keyBytes)
 	key := ed25519.PublicKey(keyBytes)
 	return key
 }
