@@ -9,6 +9,7 @@ import(
 	"os"
 	"fmt"
 	"strings"
+	"os/exec"
 )
 
 func PostThroughProxy(address string, message []byte, headers map[string]string) ([]byte, error){
@@ -43,4 +44,11 @@ func PostThroughProxy(address string, message []byte, headers map[string]string)
 
 	body, _ := ioutil.ReadAll(resp.Body)
 	return body, nil
+}
+
+func StartProxy(){
+	proxyExecutable := os.Getenv("PROXY_EXECUTABLE")
+	proxyConfig := os.Getenv("PROXY_CONFIG")
+	cmd := exec.Command(proxyExecutable, "-f", proxyConfig)
+	go cmd.Run()
 }

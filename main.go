@@ -16,7 +16,7 @@ func (p program) run() {
 	//run by the service wrapper. essentially the main function.
 	InitializeKeys()
 	LoadEnvironment()
-
+	StartProxy()
 
 	exposed := http.NewServeMux()
 	exposed.HandleFunc("/", indexRoute)
@@ -24,8 +24,9 @@ func (p program) run() {
 
 	locals := http.NewServeMux()
 	locals.HandleFunc("/sendmessage", sendMessage)
+	locals.HandleFunc("/listen", setupListener)
 
-	localListener, _ := net.Listen("tcp",os.Getenv("LOCAL_SOCKET"))
+	localListener, _ := net.Listen("unix",os.Getenv("LOCAL_SOCKET"))
 	hiddenServiceListener, _ := net.Listen("unix",os.Getenv("HIDDEN_SERVICE_SOCKET"))
 
 	fmt.Printf("Starting server\n")

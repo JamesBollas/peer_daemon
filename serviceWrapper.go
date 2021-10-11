@@ -20,6 +20,8 @@ func (p program) Start(s service.Service) error {
 func (p program) Stop(s service.Service) error {
    fmt.Println(s.String() + " stopped")
    os.Remove(os.Getenv("HIDDEN_SERVICE_SOCKET"))
+   os.Remove(os.Getenv("LOCAL_SOCKET"))
+   os.Remove(os.Getenv("PROXY_SOCKET"))
    return nil
 }
 
