@@ -15,6 +15,7 @@ import(
 func PostThroughProxy(address string, message []byte, headers map[string]string) ([]byte, error){
 	torLocal := os.Getenv("PROXY_SOCKET")
 	torSocketType := os.Getenv("PROXY_SOCKET_TYPE")
+	fmt.Println(torSocketType)
 	tbDialer, err := proxy.SOCKS5(torSocketType,torLocal ,nil, proxy.Direct)
 	if err != nil{
 		return nil, err
@@ -33,11 +34,15 @@ func PostThroughProxy(address string, message []byte, headers map[string]string)
 			req.Header.Add(key, value)
 		}
 	}
+	if err != nil{
+		panic(err)
+	}
 	fmt.Println("got past headers")
 	//req.Header.Add("User-Agent", "myClient")
 
 	resp, err := client.Do(req)
 	if err != nil{
+		panic(err)
 		return nil, err
 	}
 	defer resp.Body.Close()
