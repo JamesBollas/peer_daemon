@@ -73,8 +73,8 @@ func sendMessage(writer http.ResponseWriter, request *http.Request) {
 	//fmt.Println(len(signature))
 	headers := map[string]string {"remoteAddress":myAddress,"signature":signature,"cryptoStandard":"ed25519"}
 	//headers = map[string]string {"hi":"hi"}
-	PostThroughProxy(address, body, headers)
-
+	postReturn, _ := PostThroughProxy(address, body, headers)
+	writer.Write(postReturn)
 }
 
 func getMyAddress() string{

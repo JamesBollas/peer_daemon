@@ -14,8 +14,8 @@ import(
 
 func PostThroughProxy(address string, message []byte, headers map[string]string) ([]byte, error){
 	torLocal := os.Getenv("PROXY_SOCKET")
-
-	tbDialer, err := proxy.SOCKS5("unix",torLocal ,nil, proxy.Direct)
+	torSocketType := os.Getenv("PROXY_SOCKET_TYPE")
+	tbDialer, err := proxy.SOCKS5(torSocketType,torLocal ,nil, proxy.Direct)
 	if err != nil{
 		return nil, err
 	}
