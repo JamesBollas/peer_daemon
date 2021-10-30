@@ -80,7 +80,9 @@ func sendMessage(writer http.ResponseWriter, request *http.Request) {
 func getMyAddress() string{
 	hostname, err := ioutil.ReadFile(os.Getenv("HOSTNAME_PATH"))
 	if err != nil{
-		panic("no valid hostname file at location")
+		fmt.Println("cannot access hostname file at location")
+		fmt.Println(os.Getenv("HOSTNAME_PATH"))
+		panic(err)
 	}
 	return "http://" + string(hostname)
 }
