@@ -7,9 +7,9 @@ in_dir = os.getcwd()
 
 print('Generating torrc.')
 
-socks_socket = os.path.join(in_dir,"torsocks.socket") if not w else "localhost:9054"
+socks_socket = os.path.join(in_dir,"torsocks.socket")
 
-torrc = "SocksPort unix:" + socks_socket + "\n"
+torrc = "SocksPort unix:" + socks_socket + "\n"  if not w else "SocksPort localhost:9054"
 
 hidden_service_dir = os.path.join(in_dir, "hidden_service")
 
