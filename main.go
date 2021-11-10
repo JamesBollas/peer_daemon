@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"net"
+	"encoding/json"
 	//"io"
 	//"yukon_go/authenticationHelper"
 	//"yukon_go/torHelper"
@@ -24,7 +25,7 @@ func (p program) run() {
 
 	locals := http.NewServeMux()
 	locals.HandleFunc("/sendmessage", sendMessage)
-	//locals.HandleFunc("/listen", setupListener)
+	locals.HandleFunc("/connect", connectClient)
 
 	localListener, _ := net.Listen("unix",os.Getenv("LOCAL_SOCKET"))
 	hiddenServiceListener, _ := net.Listen("unix",os.Getenv("HIDDEN_SERVICE_SOCKET"))
@@ -42,15 +43,20 @@ func indexRoute(writer http.ResponseWriter, request *http.Request) {
 	signature := request.Header.Get("signature")
 	cryptoStandard := request.Header.Get("cryptoStandard")
 	myAddress := getMyAddress()
-	fmt.Println(remoteAddress)
+	// fmt.Println(remoteAddress)
 	verification := VerifySignature(remoteAddress, myAddress, cryptoStandard, signature, body)
 	if !verification{
 		writer.WriteHeader(403)
 		return
 	}
-	fmt.Println("printing message:")
 
-	fmt.Println(body)
+	err := HandleMessage(body, remoteAddress)
+	if err != nil{
+		writer.WriteHeader(401)
+		return
+	}
+	writer.WriteHeader(200)
+	return
 }
 
 func publicKeyRoute(writer http.ResponseWriter, request * http.Request) {
@@ -73,8 +79,16 @@ func sendMessage(writer http.ResponseWriter, request *http.Request) {
 	//fmt.Println(len(signature))
 	headers := map[string]string {"remoteAddress":myAddress,"signature":signature,"cryptoStandard":"ed25519"}
 	//headers = map[string]string {"hi":"hi"}
-	postReturn, _ := PostThroughProxy(address, body, headers)
+	statusCode, postReturn, _ := PostThroughProxy(address, body, headers)
+	writer.WriteHeader(statusCode)
 	writer.Write(postReturn)
+}
+
+func connectClient(writer http.ResponseWriter, request *http.Request) {
+	service := request.Header.Get("service")
+	connection := CreateConnection(service)
+	connectionJSON, _ := json.Marshal(&connection)
+	writer.Write(connectionJSON)
 }
 
 func getMyAddress() string{

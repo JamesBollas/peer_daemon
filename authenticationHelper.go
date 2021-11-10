@@ -32,7 +32,7 @@ func getRemoteKey(remoteAddress string) ed25519.PublicKey {
 	//todo add standard type to request
 	keyAddress := remoteKeyPath(remoteAddress)
 	//fmt.Println(keyAddress)
-	keyBytes, _ := PostThroughProxy(keyAddress, []byte(""),nil)
+	_, keyBytes, _ := PostThroughProxy(keyAddress, []byte(""),nil)
 	//fmt.Println(keyBytes)
 	key := ed25519.PublicKey(keyBytes)
 	return key

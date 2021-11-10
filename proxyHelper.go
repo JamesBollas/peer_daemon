@@ -12,13 +12,13 @@ import(
 	"os/exec"
 )
 
-func PostThroughProxy(address string, message []byte, headers map[string]string) ([]byte, error){
+func PostThroughProxy(address string, message []byte, headers map[string]string) (int, []byte, error){
 	torLocal := os.Getenv("PROXY_SOCKET")
 	torSocketType := os.Getenv("PROXY_SOCKET_TYPE")
 	fmt.Println(torSocketType)
 	tbDialer, err := proxy.SOCKS5(torSocketType,torLocal ,nil, proxy.Direct)
 	if err != nil{
-		return nil, err
+		return 500, nil, err
 	}
 	
 	tbTransport := &http.Transport{Dial: tbDialer.Dial}
@@ -42,13 +42,12 @@ func PostThroughProxy(address string, message []byte, headers map[string]string)
 
 	resp, err := client.Do(req)
 	if err != nil{
-		panic(err)
-		return nil, err
+		return 500, nil, err
 	}
 	defer resp.Body.Close()
 
 	body, _ := ioutil.ReadAll(resp.Body)
-	return body, nil
+	return resp.StatusCode, body, nil
 }
 
 func StartProxy(){
