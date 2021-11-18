@@ -42,6 +42,7 @@ func PostThroughProxy(address string, message []byte, headers map[string]string)
 
 	resp, err := client.Do(req)
 	if err != nil{
+		fmt.Println(err)
 		return 500, nil, err
 	}
 	defer resp.Body.Close()

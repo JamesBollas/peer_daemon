@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"net"
-	"encoding/json"
+	// "encoding/json"
 	//"io"
 	//"yukon_go/authenticationHelper"
 	//"yukon_go/torHelper"
@@ -26,6 +26,8 @@ func (p program) run() {
 	locals := http.NewServeMux()
 	locals.HandleFunc("/sendmessage", sendMessage)
 	locals.HandleFunc("/connect", connectClient)
+	locals.HandleFunc("/getmessage", getMessage)
+	locals.HandleFunc("/getmessageids", getMessageIds)
 
 	localListener, _ := net.Listen("unix",os.Getenv("LOCAL_SOCKET"))
 	hiddenServiceListener, _ := net.Listen("unix",os.Getenv("HIDDEN_SERVICE_SOCKET"))
@@ -84,10 +86,27 @@ func sendMessage(writer http.ResponseWriter, request *http.Request) {
 	writer.Write(postReturn)
 }
 
+func getMessage(writer http.ResponseWriter, request *http.Request) {
+	id := request.Header.Get("id")
+	message, _ := GetMessage(id)
+	writer.Write(message)
+}
+
+func getMessageIds(writer http.ResponseWriter, request *http.Request) {
+	messageIds := GetMessageIds()
+	fmt.Println("messages list:")
+	fmt.Println(messageIds)
+	for _, messageId := range messageIds{
+		fmt.Println(messageId)
+		writer.Write([]byte(messageId + "\n"))
+	}
+}
+
 func connectClient(writer http.ResponseWriter, request *http.Request) {
-	service := request.Header.Get("service")
-	connection := CreateConnection(service)
-	connectionJSON, _ := json.Marshal(&connection)
+	// service := request.Header.Get("service")
+	//connection := CreateConnection(service)
+	//connectionJSON, _ := json.Marshal(&connection)
+	connectionJSON := []byte("hello")
 	writer.Write(connectionJSON)
 }
 

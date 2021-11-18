@@ -22,6 +22,7 @@ func (p program) Stop(s service.Service) error {
    os.Remove(os.Getenv("HIDDEN_SERVICE_SOCKET"))
    os.Remove(os.Getenv("LOCAL_SOCKET"))
    os.Remove(os.Getenv("PROXY_SOCKET"))
+   CloseDatabase()
    return nil
 }
 
