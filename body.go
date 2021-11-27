@@ -1,75 +1,26 @@
 package main
 
 import (
-	//"fmt"
-	// "github.com/go-redis/redis/v8"
-	// "context"
 	"bytes"
 	"errors"
-	// "net"
-	// "database/sql"
-	// _ "github.com/mattn/go-sqlite3"
 )
 
-// var background = context.Background()
-// var rdb = redis.NewClient(&redis.Options{
-// 	Addr:     "localhost:6379",
-// 	Password: "", // no password set
-// 	DB:       0,  // use default DB
-// })
-
-// type ClientConnection struct {
-// 	Socket string
-// 	SocketType string
-// 	Service string
-// }
-
-// type ClientConnectionManager struct {
-// 	connections map[ClientConnection]struct{}
-// }
-
-// func (manager ClientConnectionManager) createConnection(service string) ClientConnection{
-// 	connection := ClientConnection{"./test.sock", "unix", service}
-// 	manager.connections[connection] = struct{}{}
-// 	return connection
-// }
-
-// func (manager ClientConnectionManager) serviceConnections(service string) []ClientConnection {
-// 	connections := make([]ClientConnection, 0)
-// 	for connection, _ := range manager.connections{
-// 		if connection.Service == service{
-// 			connections = append(connections, connection)
-// 		}
-// 	}
-// 	return connections
-// }
-
-// var manager = ClientConnectionManager{map[ClientConnection]struct{}{}}
-
+// check for format validity, then save to database
 func HandleMessage(body []byte, remoteAddress string) error {
 	service, message, isValid := getService(body)
 	if !isValid{
 		return errors.New("message is not valid")
 	}
 
-	userIdentifier, idType := getUsername(remoteAddress)
+	userIdentifier, idType := getUserIdentifier(remoteAddress)
 
 	AddMessage(service, userIdentifier, idType, message)
 
 	return nil
-	// connections := manager.serviceConnections(service)
-	// for _, connection := range connections {
-	// 	sendMessageToClient(connection, message)
-	// }
-
-    // val, err := rdb.Get(background, "key").Result()
-    // if err != nil {
-    //     panic(err)
-    // }
-	// fmt.Println("key", val)
-	// return nil
 }
 
+// gets utf-8 formatted service string from message. All messages must have format: {utf-8 service string}{newline}{binary message}
+// service type may enforce additional restrictions on the message binary format, these are not handled here.
 func getService(body []byte) (string, []byte, bool) {
 	split := bytes.SplitN(body, []byte("\n"), 2)
 	if len(split) != 2{
@@ -78,16 +29,8 @@ func getService(body []byte) (string, []byte, bool) {
 	return string(split[0]), split[1], true
 }
 
-func getUsername(remoteAddress string) (string, string){
+// TODO, will return username associated with remoteAddress if one exists, first check if cached, then hit user server.
+// If no username exists return remote address as unique identifier
+func getUserIdentifier(remoteAddress string) (string, string){
 	return remoteAddress, "address"
 }
-
-// func CreateConnection(service string) ClientConnection {
-// 	return manager.createConnection(service)
-// }
-
-// func sendMessageToClient(connection ClientConnection, message []byte){
-// 	conn, _ := net.Dial(connection.SocketType, connection.Socket)
-// 	conn.Write(message)
-// 	conn.Close()
-// }

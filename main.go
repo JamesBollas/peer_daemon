@@ -2,15 +2,10 @@ package main
 
 import (
 	"net/http"
-	//"log"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"net"
-	// "encoding/json"
-	//"io"
-	//"yukon_go/authenticationHelper"
-	//"yukon_go/torHelper"
 )
 
 func (p program) run() {
@@ -19,13 +14,14 @@ func (p program) run() {
 	LoadEnvironment()
 	StartProxy()
 
+	//routes visible as hidden service
 	exposed := http.NewServeMux()
 	exposed.HandleFunc("/", indexRoute)
 	exposed.HandleFunc("/publickey", publicKeyRoute)
 
+	//routes visible on local machine/network only
 	locals := http.NewServeMux()
 	locals.HandleFunc("/sendmessage", sendMessage)
-	locals.HandleFunc("/connect", connectClient)
 	locals.HandleFunc("/getmessage", getMessage)
 	locals.HandleFunc("/getmessageids", getMessageIds)
 
@@ -37,15 +33,15 @@ func (p program) run() {
 	http.Serve(hiddenServiceListener, exposed)
 }
 
+// receiving messages from remote
 func indexRoute(writer http.ResponseWriter, request *http.Request) {
-	fmt.Println("recieved a thingy")
 	body, _ := ioutil.ReadAll(request.Body)
-	//fmt.Println(string(body))
+
 	remoteAddress := request.Header.Get("remoteAddress")
 	signature := request.Header.Get("signature")
 	cryptoStandard := request.Header.Get("cryptoStandard")
 	myAddress := getMyAddress()
-	// fmt.Println(remoteAddress)
+
 	verification := VerifySignature(remoteAddress, myAddress, cryptoStandard, signature, body)
 	if !verification{
 		writer.WriteHeader(403)
@@ -61,55 +57,42 @@ func indexRoute(writer http.ResponseWriter, request *http.Request) {
 	return
 }
 
+// sending public key to remote
 func publicKeyRoute(writer http.ResponseWriter, request * http.Request) {
-	fmt.Println("sending public key")
 	key := []byte(MyPublicKey())
 	writer.Write(key)
 }
 
+// hit by local to send message to index route of other user/device
 func sendMessage(writer http.ResponseWriter, request *http.Request) {
 	body, _ := ioutil.ReadAll(request.Body)
-	//fmt.Println(string(body))
 	address := request.Header.Get("address")
 
 	signature := SignBody(body, address)
-	fmt.Println(address)
-	fmt.Println(signature)
 	myAddress := getMyAddress()
-
-	//fmt.Println(len(myAddress))
-	//fmt.Println(len(signature))
 	headers := map[string]string {"remoteAddress":myAddress,"signature":signature,"cryptoStandard":"ed25519"}
-	//headers = map[string]string {"hi":"hi"}
+
 	statusCode, postReturn, _ := PostThroughProxy(address, body, headers)
 	writer.WriteHeader(statusCode)
 	writer.Write(postReturn)
 }
 
+// hit by local to retrieve a message by id from the sqlite database
 func getMessage(writer http.ResponseWriter, request *http.Request) {
 	id := request.Header.Get("id")
 	message, _ := GetMessage(id)
 	writer.Write(message)
 }
 
+// hit by local to retrieve all message ids from sqlite database
 func getMessageIds(writer http.ResponseWriter, request *http.Request) {
 	messageIds := GetMessageIds()
-	fmt.Println("messages list:")
-	fmt.Println(messageIds)
 	for _, messageId := range messageIds{
-		fmt.Println(messageId)
 		writer.Write([]byte(messageId + "\n"))
 	}
 }
 
-func connectClient(writer http.ResponseWriter, request *http.Request) {
-	// service := request.Header.Get("service")
-	//connection := CreateConnection(service)
-	//connectionJSON, _ := json.Marshal(&connection)
-	connectionJSON := []byte("hello")
-	writer.Write(connectionJSON)
-}
-
+// not a route, returns the hidden service address of this machine
 func getMyAddress() string{
 	hostname, err := ioutil.ReadFile(os.Getenv("HOSTNAME_PATH"))
 	if err != nil{

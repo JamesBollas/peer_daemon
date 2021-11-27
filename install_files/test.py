@@ -1,43 +1,24 @@
-import requests
-import os
-from dotenv import dotenv_values
-import requests_unixsocket
-import socket
-import asyncio
+import pdci
+import time
+import threading
 
-def convert_unix_socket(socket):
-    return localsocket.replace("/","%2F")
+def print_thread():
+    printed = set()
+    i = 0
+    while True:
+        i +=1 
+        messages = pdci.update_messages()
+        for key, message in messages.items():
+            if key not in printed:
+                print(message.decode("utf-8"))
+                printed.add(key)
+        time.sleep(.1)
+        
+print_thread = threading.Thread(target=print_thread)
+print_thread.daemon = True
+print_thread.start()
 
-requests_unixsocket.monkeypatch()
-
-config = dotenv_values(".env")
-
-localsocket = config['LOCAL_SOCKET']
-
-localsocket = convert_unix_socket(localsocket)
-
-with open(config['HOSTNAME_PATH'],'r') as f:
-    hostname = f.read()
-
-hostname = "http://" + hostname[:-1]
-
-
-headers = {'service':"chat", "id":b"1"}
-
-url = "http+unix://" + localsocket+"/getmessage"
-
-print(url)
-
-r = requests.post(url, headers=headers)
-print(r.content)
-
-
-# headers = {'address':hostname}
-
-# url = "http+unix://" + localsocket+"/sendmessage"
-
-# print(url)
-
-# r = requests.post(url, data=b"chat\nHello World!", headers=headers)
-
-# print(str(r.content))
+while True:
+    print("\t\t\t",end="")
+    message = input()
+    pdci.sendmessage(pdci.my_hostname(), "chat", bytes(message,encoding="utf-8"))

@@ -1,5 +1,3 @@
 yukon_server
-install_files/*.socket
-install_files/hidden_service
-install_files/peer_daemon*
-install_files/peer_daemon.torrc
+install_files/*
+!install_files/*.py

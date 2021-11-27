@@ -9,6 +9,7 @@ import(
 
 var db, _ = sql.Open("sqlite3","./foo.db")
 
+// add message to messages table, (and create table if it does not exist clean up this part plz)
 func AddMessage(service string, userIdentifier string, idType string, message []byte) {
 	fmt.Println(message)
 	statement1, err := db.Prepare(`create table messages ("service" text, "userIdentifier" text, "idType" text, "message" blob)`);
@@ -17,14 +18,15 @@ func AddMessage(service string, userIdentifier string, idType string, message []
 	}
 	statement2, err := db.Prepare("insert into messages(service, userIdentifier, idType, message) values(?,?,?,?)")
 	if err != nil{
-		panic(err)
+		panic(err) // should this panic??
 	}
 	_, err = statement2.Exec(service, userIdentifier, idType, message)
 	if err != nil{
-		panic(err)
+		panic(err) // should this panic??
 	}
 }
 
+// return message with given id
 func GetMessage(id string) ([]byte, error) {
 	statement, err := db.Prepare("select message from messages where rowid=?")
 	if err != nil {
@@ -38,6 +40,7 @@ func GetMessage(id string) ([]byte, error) {
 	return message, nil
 }
 
+// return all message ids
 func GetMessageIds() []string {
 	row, err := db.Query("select rowid from messages")
 	if err != nil {
