@@ -7,7 +7,7 @@ import(
 	"strconv"
 )
 
-var db, _ = sql.Open("sqlite3","./foo.db")
+var db, _ = sql.Open("sqlite3","/var/lib/peerd/foo.db")
 
 func CreateMessagesTable(){
 	statement1, err := db.Prepare(`create table messages ("service" text, "userIdentifier" text, "idType" text, "message" blob)`);
