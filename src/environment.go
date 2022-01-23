@@ -5,7 +5,7 @@ import (
 )
 
 func LoadEnvironment(){
-	err := godotenv.Load(".env")
+	err := godotenv.Load(EnvironmentPath)
 	if err != nil{
 		//todo set default values here?
 		panic("no environment")

@@ -25,9 +25,14 @@ func (p program) run() {
 	locals.HandleFunc("/getmessage", getMessage)
 	locals.HandleFunc("/getmessageids", getMessageIds)
 
-	localListener, _ := net.Listen("unix",os.Getenv("LOCAL_SOCKET"))
-	hiddenServiceListener, _ := net.Listen("unix",os.Getenv("HIDDEN_SERVICE_SOCKET"))
-
+	localListener, err := net.Listen(os.Getenv("LOCAL_SOCKET_TYPE"),os.Getenv("LOCAL_SOCKET"))
+	if err != nil{
+		panic(err)
+	}
+	hiddenServiceListener, err := net.Listen(os.Getenv("HIDDEN_SERVICE_SOCKET_TYPE"),os.Getenv("HIDDEN_SERVICE_SOCKET"))
+	if err != nil{
+		panic(err)
+	}
 	fmt.Printf("Starting server\n")
 	go http.Serve(localListener, locals)
 	http.Serve(hiddenServiceListener, exposed)
@@ -65,9 +70,17 @@ func publicKeyRoute(writer http.ResponseWriter, request * http.Request) {
 
 // hit by local to send message to index route of other user/device
 func sendMessage(writer http.ResponseWriter, request *http.Request) {
+	if request.Method == "OPTIONS"{
+		writer.Header().Set("Access-Control-Allow-Origin", "*")
+		writer.Header().Set("Access-Control-Allow-Headers","*")
+		return
+	}
+	writer.Header().Set("Access-Control-Allow-Origin", "*")
+	writer.Header().Set("Access-Control-Allow-Headers","*")
 	body, _ := ioutil.ReadAll(request.Body)
 	address := request.Header.Get("address")
-
+	fmt.Println(address)
+	fmt.Println(body)
 	signature := SignBody(body, address)
 	myAddress := getMyAddress()
 	headers := map[string]string {"remoteAddress":myAddress,"signature":signature,"cryptoStandard":"ed25519"}
@@ -79,6 +92,13 @@ func sendMessage(writer http.ResponseWriter, request *http.Request) {
 
 // hit by local to retrieve a message by id from the sqlite database
 func getMessage(writer http.ResponseWriter, request *http.Request) {
+	if request.Method == "OPTIONS"{
+		writer.Header().Set("Access-Control-Allow-Origin", "*")
+		writer.Header().Set("Access-Control-Allow-Headers","*")
+		return
+	}
+	writer.Header().Set("Access-Control-Allow-Origin", "*")
+	writer.Header().Set("Access-Control-Allow-Headers","*")
 	id := request.Header.Get("id")
 	message, _ := GetMessage(id)
 	writer.Write(message)
@@ -86,6 +106,13 @@ func getMessage(writer http.ResponseWriter, request *http.Request) {
 
 // hit by local to retrieve all message ids from sqlite database
 func getMessageIds(writer http.ResponseWriter, request *http.Request) {
+	if request.Method == "OPTIONS"{
+		writer.Header().Set("Access-Control-Allow-Origin", "*")
+		writer.Header().Set("Access-Control-Allow-Headers","*")
+		return
+	}
+	writer.Header().Set("Access-Control-Allow-Origin", "*")
+	writer.Header().Set("Access-Control-Allow-Headers","*")
 	messageIds := GetMessageIds()
 	for _, messageId := range messageIds{
 		writer.Write([]byte(messageId + "\n"))

@@ -26,7 +26,7 @@ def my_hostname():
 def getmessageids():
     headers = {'service':"chat"}
 
-    url = "http+unix://" + localsocket+"/getmessageids"
+    url = "http://localhost" + localsocket+"/getmessageids"
 
     #print(url)
 
@@ -36,7 +36,7 @@ def getmessageids():
 def getmessage(i_d):
     headers = {'service':"chat", "id":i_d}
 
-    url = "http+unix://" + localsocket+"/getmessage"
+    url = "http://localhost" + localsocket+"/getmessage"
 
     #print(url)
 
@@ -47,7 +47,7 @@ def getmessage(i_d):
 def sendmessage(address, service, message):
     headers = {'address':address}
 
-    url = "http+unix://" + localsocket+"/sendmessage"
+    url = "http://localhost" + localsocket+"/sendmessage"
 
     data = bytes(service, encoding="utf-8") + b"\n" + message
 

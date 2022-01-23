@@ -13,6 +13,11 @@ type program struct{}
 
 func (p program) Start(s service.Service) error {
    fmt.Println(s.String() + " started")
+   LoadEnvironment()
+   os.Remove(os.Getenv("HIDDEN_SERVICE_SOCKET"))
+   os.Remove(os.Getenv("LOCAL_SOCKET"))
+   os.Remove(os.Getenv("PROXY_SOCKET"))
+   CreateMessagesTable()
    go p.run()
    return nil
 }

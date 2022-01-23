@@ -9,13 +9,16 @@ import(
 
 var db, _ = sql.Open("sqlite3","./foo.db")
 
-// add message to messages table, (and create table if it does not exist clean up this part plz)
-func AddMessage(service string, userIdentifier string, idType string, message []byte) {
-	fmt.Println(message)
+func CreateMessagesTable(){
 	statement1, err := db.Prepare(`create table messages ("service" text, "userIdentifier" text, "idType" text, "message" blob)`);
 	if err == nil{
 		statement1.Exec()
 	}
+}
+
+// add message to messages table, (and create table if it does not exist clean up this part plz)
+func AddMessage(service string, userIdentifier string, idType string, message []byte) {
+	fmt.Println(message)
 	statement2, err := db.Prepare("insert into messages(service, userIdentifier, idType, message) values(?,?,?,?)")
 	if err != nil{
 		panic(err) // should this panic??
