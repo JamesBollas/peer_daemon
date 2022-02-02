@@ -21,4 +21,4 @@ print_thread.start()
 while True:
     print("\t\t\t",end="")
     message = input()
-    pdci.sendmessage(pdci.my_hostname(), "chat", bytes(message,encoding="utf-8"))
+    pdci.sendmessage_username("pdci.my_hostname()", "chat", bytes(message,encoding="utf-8"))

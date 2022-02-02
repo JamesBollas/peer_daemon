@@ -5,9 +5,19 @@ import(
 	"fmt"
 	"errors"
 	"strconv"
+	"os"
 )
 
-var db, _ = sql.Open("sqlite3","/var/lib/peerd/foo.db")
+var db *sql.DB
+
+func OpenDBGlobal(){
+	var err error
+	db, err = sql.Open("sqlite3",os.Getenv("DATABASE"))
+	if err != nil{
+		fmt.Println("Could not open sqlite3 database!")
+		panic(err)
+	}
+}
 
 func CreateMessagesTable(){
 	statement1, err := db.Prepare(`create table messages ("service" text, "userIdentifier" text, "idType" text, "message" blob)`);

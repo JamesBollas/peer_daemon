@@ -44,7 +44,7 @@ def getmessage(i_d):
     return r.content
 
 
-def sendmessage(address, service, message):
+def sendmessage_address(address, service, message):
     headers = {'address':address}
 
     url = "http://localhost" + localsocket+"/sendmessage"
@@ -53,7 +53,14 @@ def sendmessage(address, service, message):
 
     r = requests.post(url, data=data, headers=headers)
 
+def sendmessage_username(username, service, message):
+    headers = {'username':username}
 
+    url = "http://localhost" + localsocket+"/sendmessage"
+
+    data = bytes(service, encoding="utf-8") + b"\n" + message
+
+    r = requests.post(url, data=data, headers=headers)
 
 
 ##### message manager #####

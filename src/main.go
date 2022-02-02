@@ -79,6 +79,14 @@ func sendMessage(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Access-Control-Allow-Headers","*")
 	body, _ := ioutil.ReadAll(request.Body)
 	address := request.Header.Get("address")
+	username := request.Header.Get("username")
+	if address != "" && username != ""{
+		writer.WriteHeader(400)
+		writer.Write([]byte("Do not set both the address and username headers"))
+	}
+	if address == ""{
+		address = GetAddressFromUsername(username)
+	}
 	fmt.Println(address)
 	fmt.Println(body)
 	signature := SignBody(body, address)

@@ -17,6 +17,7 @@ func (p program) Start(s service.Service) error {
    os.Remove(os.Getenv("HIDDEN_SERVICE_SOCKET"))
    os.Remove(os.Getenv("LOCAL_SOCKET"))
    os.Remove(os.Getenv("PROXY_SOCKET"))
+   OpenDBGlobal()
    CreateMessagesTable()
    go p.run()
    return nil
